@@ -1,0 +1,157 @@
+
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: var(--font-sans); }
+  .hub { padding: 1.5rem 0; }
+  .section-label { font-size: 12px; color: var(--color-text-secondary); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 12px; }
+  .module-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 1.5rem; }
+  .module-card { background: var(--color-background-primary); border: 0.5px solid var(--color-border-tertiary); border-radius: var(--border-radius-lg); padding: 14px 12px; cursor: pointer; transition: border-color 0.15s; }
+  .module-card:hover { border-color: var(--color-border-secondary); }
+  .module-card.active { border: 2px solid #185FA5; }
+  .mod-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 8px; font-size: 16px; }
+  .mod-name { font-size: 13px; font-weight: 500; color: var(--color-text-primary); }
+  .mod-desc { font-size: 11px; color: var(--color-text-secondary); margin-top: 3px; }
+  .preview { background: var(--color-background-secondary); border-radius: var(--border-radius-lg); padding: 1.25rem; min-height: 200px; }
+  .preview-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 1rem; }
+  .preview-title { font-size: 15px; font-weight: 500; color: var(--color-text-primary); }
+  .badge { font-size: 11px; padding: 3px 10px; border-radius: 20px; }
+  .badge-blue { background: #E6F1FB; color: #0C447C; }
+  .badge-green { background: #EAF3DE; color: #27500A; }
+  .badge-amber { background: #FAEEDA; color: #633806; }
+  .badge-coral { background: #FAECE7; color: #712B13; }
+  .log-row { display: flex; align-items: center; gap: 10px; padding: 8px 0; border-bottom: 0.5px solid var(--color-border-tertiary); font-size: 13px; }
+  .log-row:last-child { border-bottom: none; }
+  .log-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot-green { background: #639922; }
+  .dot-amber { background: #BA7517; }
+  .dot-blue { background: #185FA5; }
+  .dot-coral { background: #D85A30; }
+  .log-meta { color: var(--color-text-secondary); font-size: 11px; margin-left: auto; }
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 1rem; }
+  .stat { background: var(--color-background-primary); border-radius: var(--border-radius-md); padding: 10px; }
+  .stat-val { font-size: 20px; font-weight: 500; color: var(--color-text-primary); }
+  .stat-lbl { font-size: 11px; color: var(--color-text-secondary); margin-top: 2px; }
+  .ask-btn { background: transparent; border: 0.5px solid var(--color-border-secondary); border-radius: var(--border-radius-md); padding: 8px 14px; font-size: 13px; color: var(--color-text-primary); cursor: pointer; margin-top: 1rem; width: 100%; }
+  .ask-btn:hover { background: var(--color-background-secondary); }
+</style>
+<h2 class="sr-only">Multi-domain management system concept with selectable modules for hotel, logistics, school, and more</h2>
+<div class="hub">
+  <p class="section-label">Select a module</p>
+  <div class="module-grid" id="modules">
+    <div class="module-card active" onclick="switchModule('hotel',this)">
+      <div class="mod-icon" style="background:#E6F1FB;">🏨</div>
+      <div class="mod-name">Hotel</div>
+      <div class="mod-desc">Bookings, rooms, guests</div>
+    </div>
+    <div class="module-card" onclick="switchModule('logistics',this)">
+      <div class="mod-icon" style="background:#EAF3DE;">🚚</div>
+      <div class="mod-name">Logistics</div>
+      <div class="mod-desc">Shipments, routes, drivers</div>
+    </div>
+    <div class="module-card" onclick="switchModule('school',this)">
+      <div class="mod-icon" style="background:#FAEEDA;">🎓</div>
+      <div class="mod-name">School</div>
+      <div class="mod-desc">Students, classes, fees</div>
+    </div>
+    <div class="module-card" onclick="switchModule('inventory',this)">
+      <div class="mod-icon" style="background:#FAECE7;">📦</div>
+      <div class="mod-name">Inventory</div>
+      <div class="mod-desc">Stock, suppliers, orders</div>
+    </div>
+  </div>
+
+  <p class="section-label">Live preview</p>
+  <div class="preview" id="preview">
+    <div class="preview-header">
+      <span class="preview-title">Hotel management</span>
+      <span class="badge badge-blue">12 active bookings</span>
+    </div>
+    <div class="stats-row">
+      <div class="stat"><div class="stat-val">34</div><div class="stat-lbl">Rooms</div></div>
+      <div class="stat"><div class="stat-val">18</div><div class="stat-lbl">Occupied</div></div>
+      <div class="stat"><div class="stat-val">6</div><div class="stat-lbl">Check-ins today</div></div>
+    </div>
+    <div id="log-list">
+      <div class="log-row"><span class="log-dot dot-green"></span> Room 204 — Checked in <span class="log-meta">9:02 AM</span></div>
+      <div class="log-row"><span class="log-dot dot-blue"></span> Room 110 — Booking confirmed <span class="log-meta">8:47 AM</span></div>
+      <div class="log-row"><span class="log-dot dot-amber"></span> Room 312 — Late checkout request <span class="log-meta">8:30 AM</span></div>
+      <div class="log-row"><span class="log-dot dot-coral"></span> Room 101 — Maintenance flagged <span class="log-meta">Yesterday</span></div>
+    </div>
+  </div>
+  <button class="ask-btn" onclick="sendPrompt('Help me design the full hotel management module with booking, check-in/checkout, room status, and log features')">Explore hotel module in detail ↗</button>
+</div>
+
+<script>
+const data = {
+  hotel: {
+    title: 'Hotel management',
+    badge: '12 active bookings', bclass: 'badge-blue',
+    stats: [{v:'34',l:'Rooms'},{v:'18',l:'Occupied'},{v:'6',l:'Check-ins today'}],
+    logs: [
+      {dot:'dot-green', text:'Room 204 — Checked in', time:'9:02 AM'},
+      {dot:'dot-blue', text:'Room 110 — Booking confirmed', time:'8:47 AM'},
+      {dot:'dot-amber', text:'Room 312 — Late checkout request', time:'8:30 AM'},
+      {dot:'dot-coral', text:'Room 101 — Maintenance flagged', time:'Yesterday'},
+    ],
+    btn: 'Explore hotel module in detail',
+    prompt: 'Help me design the full hotel management module with booking, check-in/checkout, room status, and log features'
+  },
+  logistics: {
+    title: 'Logistics management',
+    badge: '8 active routes', bclass: 'badge-green',
+    stats: [{v:'23',l:'Shipments'},{v:'5',l:'In transit'},{v:'3',l:'Delivered today'}],
+    logs: [
+      {dot:'dot-green', text:'Shipment #0042 — Delivered', time:'10:15 AM'},
+      {dot:'dot-blue', text:'Driver Musa — Route assigned', time:'9:50 AM'},
+      {dot:'dot-amber', text:'Shipment #0039 — Delayed', time:'9:20 AM'},
+      {dot:'dot-coral', text:'Vehicle V-07 — Maintenance due', time:'Yesterday'},
+    ],
+    btn: 'Explore logistics module in detail',
+    prompt: 'Help me design the logistics module with shipment tracking, driver management, and route logs'
+  },
+  school: {
+    title: 'School management',
+    badge: '3 classes today', bclass: 'badge-amber',
+    stats: [{v:'210',l:'Students'},{v:'14',l:'Staff'},{v:'8',l:'Classrooms'}],
+    logs: [
+      {dot:'dot-green', text:'JSS 3B — Attendance recorded', time:'8:00 AM'},
+      {dot:'dot-blue', text:'New student — Enrolled', time:'7:45 AM'},
+      {dot:'dot-amber', text:'Fee payment — ₦15,000 received', time:'7:30 AM'},
+      {dot:'dot-coral', text:'Exam timetable — Updated', time:'Yesterday'},
+    ],
+    btn: 'Explore school module in detail',
+    prompt: 'Help me design the school management module with student records, attendance, fees, and class scheduling'
+  },
+  inventory: {
+    title: 'Inventory management',
+    badge: '4 low stock alerts', bclass: 'badge-coral',
+    stats: [{v:'148',l:'Products'},{v:'12',l:'Suppliers'},{v:'9',l:'Orders pending'}],
+    logs: [
+      {dot:'dot-green', text:'Stock replenished — Cement x200', time:'11:00 AM'},
+      {dot:'dot-blue', text:'Purchase order #77 — Sent', time:'10:30 AM'},
+      {dot:'dot-amber', text:'Item #034 — Low stock warning', time:'10:00 AM'},
+      {dot:'dot-coral', text:'Supplier Ade & Co — Invoice due', time:'Yesterday'},
+    ],
+    btn: 'Explore inventory module in detail',
+    prompt: 'Help me design the inventory management module with stock tracking, supplier management, and order logs'
+  }
+};
+
+function switchModule(key, el) {
+  document.querySelectorAll('.module-card').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
+  const d = data[key];
+  document.querySelector('.preview-title').textContent = d.title;
+  const badge = document.querySelector('.badge');
+  badge.textContent = d.badge;
+  badge.className = 'badge ' + d.bclass;
+  const statsRow = document.querySelector('.stats-row');
+  statsRow.innerHTML = d.stats.map(s => `<div class="stat"><div class="stat-val">${s.v}</div><div class="stat-lbl">${s.l}</div></div>`).join('');
+  document.getElementById('log-list').innerHTML = d.logs.map(l =>
+    `<div class="log-row"><span class="log-dot ${l.dot}"></span> ${l.text} <span class="log-meta">${l.time}</span></div>`
+  ).join('');
+  const btn = document.querySelector('.ask-btn');
+  btn.textContent = d.btn + ' ↗';
+  btn.onclick = () => sendPrompt(d.prompt);
+}
+</script>
