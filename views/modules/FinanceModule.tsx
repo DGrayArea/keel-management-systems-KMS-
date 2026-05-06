@@ -10,6 +10,8 @@ import { SectionLabel } from '@/components/shared/SectionLabel';
 import { LogDot } from '@/components/shared/LogDot';
 import { Button } from '@/components/ui/button';
 import { Plus, TrendingUp, TrendingDown } from 'lucide-react';
+import { Bar, BarChart, CartesianGrid, XAxis, YAxis, PieChart, Pie, Cell } from "recharts";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 import type { StatusVariant } from '@/types/modules';
 
 const tabs = [
@@ -87,29 +89,19 @@ export default function FinanceModule() {
 
           <SectionLabel>Monthly cashflow</SectionLabel>
           <div className="bg-card border border-border rounded-lg p-5 mb-5">
-            <div className="flex items-end justify-between gap-6 h-48">
-              {monthlyData.map(m => (
-                <div key={m.month} className="flex-1 flex flex-col items-center gap-1.5">
-                  <div className="w-full flex items-end justify-center gap-1 flex-1">
-                    <div
-                      className="w-1/3 bg-dot-green rounded-t-sm transition-all"
-                      style={{ height: `${(m.income / maxBar) * 100}%` }}
-                      title={`Income: ₦${m.income}M`}
-                    />
-                    <div
-                      className="w-1/3 bg-dot-coral rounded-t-sm transition-all"
-                      style={{ height: `${(m.expense / maxBar) * 100}%` }}
-                      title={`Expense: ₦${m.expense}M`}
-                    />
-                  </div>
-                  <span className="text-[11px] text-muted-foreground">{m.month}</span>
-                </div>
-              ))}
-            </div>
-            <div className="flex items-center gap-4 mt-3 text-[11px] text-muted-foreground">
-              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-dot-green" /> Income</span>
-              <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full bg-dot-coral" /> Expenses</span>
-            </div>
+            <ChartContainer config={{
+              income: { label: "Income", color: "hsl(var(--dot-green))" },
+              expense: { label: "Expense", color: "hsl(var(--dot-coral))" }
+            }} className="h-64 w-full">
+              <BarChart data={monthlyData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }} barGap={2} barSize={32}>
+                <CartesianGrid strokeDasharray="3 3" vertical={false} />
+                <XAxis dataKey="month" tickLine={false} axisLine={false} fontSize={11} tickMargin={8} />
+                <YAxis tickFormatter={(val) => `₦${val}M`} tickLine={false} axisLine={false} fontSize={11} />
+                <ChartTooltip content={<ChartTooltipContent />} />
+                <Bar dataKey="income" fill="var(--color-income)" radius={[2, 2, 0, 0]} />
+                <Bar dataKey="expense" fill="var(--color-expense)" radius={[2, 2, 0, 0]} />
+              </BarChart>
+            </ChartContainer>
           </div>
 
           <SectionLabel>Recent activity</SectionLabel>
@@ -166,17 +158,40 @@ export default function FinanceModule() {
             <StatCard value={6} label="Categories" />
             <StatCard value={4} label="Pending approval" />
           </div>
-          <SectionLabel>Expense ledger</SectionLabel>
-          <div className="bg-card border border-border rounded-lg divide-y divide-border">
-            {expenses.map(e => (
-              <div key={e.id} className="flex items-center gap-3 px-4 py-3">
-                <div className="flex-1 min-w-0">
-                  <div className="text-[13px] font-medium text-foreground">{e.category}</div>
-                  <div className="text-[11px] text-muted-foreground">{e.id} · {e.vendor} · {e.date}</div>
-                </div>
-                <span className="text-[13px] font-medium text-foreground">₦{e.amount.toLocaleString()}</span>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 mb-5">
+            <div>
+              <SectionLabel>Expense ledger</SectionLabel>
+              <div className="bg-card border border-border rounded-lg divide-y divide-border">
+                {expenses.map(e => (
+                  <div key={e.id} className="flex items-center gap-3 px-4 py-3">
+                    <div className="flex-1 min-w-0">
+                      <div className="text-[13px] font-medium text-foreground">{e.category}</div>
+                      <div className="text-[11px] text-muted-foreground">{e.id} · {e.vendor} · {e.date}</div>
+                    </div>
+                    <span className="text-[13px] font-medium text-foreground">₦{e.amount.toLocaleString()}</span>
+                  </div>
+                ))}
               </div>
-            ))}
+            </div>
+            <div>
+              <SectionLabel>Expense Breakdown</SectionLabel>
+              <div className="bg-card border border-border rounded-lg p-5 flex items-center justify-center">
+                <ChartContainer config={{}} className="h-64 w-full">
+                  <PieChart>
+                    <ChartTooltip content={<ChartTooltipContent />} />
+                    <Pie
+                      data={expenses.map((e, i) => ({ name: e.category, value: e.amount, fill: `hsl(var(--chart-${(i % 5) + 1}))` }))}
+                      dataKey="value"
+                      nameKey="name"
+                      innerRadius={60}
+                      outerRadius={80}
+                      paddingAngle={2}
+                    />
+                  </PieChart>
+                </ChartContainer>
+              </div>
+            </div>
           </div>
         </motion.div>
       )}

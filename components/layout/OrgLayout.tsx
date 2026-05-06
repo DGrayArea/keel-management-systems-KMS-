@@ -25,7 +25,7 @@ export function OrgLayout({ children }: { children: React.ReactNode }) {
   if (!currentOrg) return null;
 
   return (
-    <div className="min-h-screen flex w-full bg-background">
+    <div className="h-screen overflow-hidden flex w-full bg-background">
       <OrgSidebar />
       <div className="flex-1 flex flex-col min-w-0">
         <AppHeader />

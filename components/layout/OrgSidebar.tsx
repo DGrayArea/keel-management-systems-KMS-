@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { useAppContext } from '@/contexts/AppContext';
 import { MODULES } from '@/types/modules';
+import { MOCK_USERS } from '@/types/organisation';
 const keelLogo = '/assets/keel-logo.png';
 
 const ICON_MAP: Record<string, React.ComponentType<{ className?: string }>> = {
@@ -29,6 +30,11 @@ export function OrgSidebar() {
   const router = useRouter();
   const { currentOrg, currentRole, setCurrentOrg } = useAppContext();
   const [collapsed, setCollapsed] = useState(false);
+
+  const currentUser = currentOrg 
+    ? MOCK_USERS.find(u => u.orgId === currentOrg.id && u.role === currentRole) || MOCK_USERS.find(u => u.role === currentRole)
+    : MOCK_USERS.find(u => u.role === currentRole) || MOCK_USERS[0];
+  const initials = currentUser?.name.split(" ").map(n => n[0]).join("") || (currentRole === 'super_admin' ? 'SA' : 'AD');
 
   if (!currentOrg) return null;
   const slug = currentOrg.slug;
@@ -90,7 +96,7 @@ export function OrgSidebar() {
             <p className="text-[10px] uppercase tracking-wider text-muted-foreground px-2 mb-1.5">Overview</p>
           )}
           {overviewItems.map((item) => {
-            const isActive = pathname === item.path;
+            const isActive = pathname === item.path || (item.path !== basePath && pathname.startsWith(item.path));
             return (
               <button
                 key={item.path}
@@ -141,7 +147,7 @@ export function OrgSidebar() {
               <p className="text-[10px] uppercase tracking-wider text-muted-foreground px-2 mb-1.5">System</p>
             )}
             {systemItems.map((item) => {
-              const isActive = pathname === item.path;
+              const isActive = pathname === item.path || (item.path !== basePath && pathname.startsWith(item.path));
               return (
                 <button
                   key={item.path}
@@ -165,14 +171,14 @@ export function OrgSidebar() {
       <div className="border-t border-border p-3 flex-shrink-0">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary flex-shrink-0">
-            {currentRole === 'super_admin' ? 'SA' : 'AD'}
+            {initials}
           </div>
           {!collapsed && (
             <div className="min-w-0">
               <p className="text-xs font-medium text-foreground truncate">
-                {currentRole === 'super_admin' ? 'Super Admin' : 'Admin'}
+                {currentUser?.name || (currentRole === 'super_admin' ? 'Super Admin' : 'Admin')}
               </p>
-              <p className="text-[10px] text-muted-foreground truncate">{currentOrg.contactEmail}</p>
+              <p className="text-[10px] text-muted-foreground truncate">{currentUser?.email || currentOrg.contactEmail}</p>
             </div>
           )}
         </div>

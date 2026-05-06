@@ -1,29 +1,38 @@
 "use client";
-import { useRouter, usePathname } from 'next/navigation';
+import { useRouter, usePathname } from "next/navigation";
+import { useAppContext } from "@/contexts/AppContext";
+import { MOCK_USERS, ROLE_LABELS } from "@/types/organisation";
 
 import {
-  LayoutGrid, Building2, Users, Settings, FileText, Shield, ChevronLeft, Activity,
-} from 'lucide-react';
-import { cn } from '@/lib/utils';
-import { useState } from 'react';
-const keelLogo = '/assets/keel-logo.png';
+  LayoutGrid,
+  Building2,
+  Users,
+  Settings,
+  FileText,
+  Shield,
+  ChevronLeft,
+  Activity,
+} from "lucide-react";
+import { cn } from "@/lib/utils";
+import { useState } from "react";
+const keelLogo = "/assets/keel-logo.png";
 
 const navSections = [
   {
-    label: 'Overview',
+    label: "Overview",
     items: [
-      { label: 'Dashboard', icon: LayoutGrid, path: '/' },
-      { label: 'Organisations', icon: Building2, path: '/organisations' },
-      { label: 'All Users', icon: Users, path: '/users' },
-      { label: 'Audit Logs', icon: FileText, path: '/audit-logs' },
-      { label: 'System Health', icon: Activity, path: '/health' },
+      { label: "Dashboard", icon: LayoutGrid, path: "/" },
+      { label: "Organisations", icon: Building2, path: "/organisations" },
+      { label: "All Users", icon: Users, path: "/users" },
+      { label: "Audit Logs", icon: FileText, path: "/audit-logs" },
+      { label: "System Health", icon: Activity, path: "/health" },
     ],
   },
   {
-    label: 'System',
+    label: "System",
     items: [
-      { label: 'Permissions', icon: Shield, path: '/permissions' },
-      { label: 'Settings', icon: Settings, path: '/settings' },
+      { label: "Permissions", icon: Shield, path: "/permissions" },
+      { label: "Settings", icon: Settings, path: "/settings" },
     ],
   },
 ];
@@ -31,27 +40,45 @@ const navSections = [
 export function SuperAdminSidebar() {
   const pathname = usePathname();
   const router = useRouter();
+  const { currentRole, currentOrg } = useAppContext();
   const [collapsed, setCollapsed] = useState(false);
 
+  const currentUser = currentOrg 
+    ? MOCK_USERS.find(u => u.orgId === currentOrg.id && u.role === currentRole) || MOCK_USERS.find(u => u.role === currentRole)
+    : MOCK_USERS.find(u => u.role === currentRole) || MOCK_USERS[0];
+
+  const initials = currentUser?.name.split(" ").map(n => n[0]).join("") || "SA";
+
   return (
-    <aside className={cn(
-      'h-screen bg-card border-r border-border flex flex-col transition-all duration-200 flex-shrink-0',
-      collapsed ? 'w-16' : 'w-60'
-    )}>
+    <aside
+      className={cn(
+        "h-screen bg-card border-r border-border flex flex-col transition-all duration-200 flex-shrink-0",
+        collapsed ? "w-16" : "w-60",
+      )}
+    >
       {/* Brand */}
       <div className="h-14 flex items-center justify-between px-4 border-b border-border flex-shrink-0">
         {!collapsed && (
           <div className="flex items-center gap-2">
             <img src={keelLogo} alt="KEEL" className="w-7 h-7" />
-            <span className="text-sm font-semibold text-foreground tracking-tight">KEEL</span>
-            <span className="text-[9px] font-medium px-1.5 py-0.5 rounded badge-coral">SUPER</span>
+            <span className="text-sm font-semibold text-foreground tracking-tight">
+              KEEL
+            </span>
+            <span className="text-[9px] font-medium px-1.5 py-0.5 rounded badge-coral">
+              SUPER
+            </span>
           </div>
         )}
         <button
           onClick={() => setCollapsed(!collapsed)}
           className="p-1.5 rounded-md hover:bg-secondary text-muted-foreground transition-colors"
         >
-          <ChevronLeft className={cn('w-4 h-4 transition-transform', collapsed && 'rotate-180')} />
+          <ChevronLeft
+            className={cn(
+              "w-4 h-4 transition-transform",
+              collapsed && "rotate-180",
+            )}
+          />
         </button>
       </div>
 
@@ -60,20 +87,23 @@ export function SuperAdminSidebar() {
         {navSections.map((section) => (
           <div key={section.label} className="mb-4">
             {!collapsed && (
-              <p className="text-[10px] uppercase tracking-wider text-muted-foreground px-2 mb-1.5">{section.label}</p>
+              <p className="text-[10px] uppercase tracking-wider text-muted-foreground px-2 mb-1.5">
+                {section.label}
+              </p>
             )}
             {section.items.map((item) => {
-              const isActive = pathname === item.path ||
-                (item.path !== '/' && pathname.startsWith(item.path));
+              const isActive =
+                pathname === item.path ||
+                (item.path !== "/" && pathname.startsWith(item.path));
               return (
                 <button
                   key={item.path}
                   onClick={() => router.push(item.path)}
                   className={cn(
-                    'w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[13px] transition-colors mb-0.5',
+                    "w-full flex items-center gap-2.5 px-2.5 py-2 rounded-md text-[13px] transition-colors mb-0.5",
                     isActive
-                      ? 'bg-primary/10 text-primary font-medium'
-                      : 'text-muted-foreground hover:bg-secondary hover:text-foreground'
+                      ? "bg-primary/10 text-primary font-medium"
+                      : "text-muted-foreground hover:bg-secondary hover:text-foreground",
                   )}
                   title={collapsed ? item.label : undefined}
                 >
@@ -90,12 +120,16 @@ export function SuperAdminSidebar() {
       <div className="border-t border-border p-3 flex-shrink-0">
         <div className="flex items-center gap-2.5">
           <div className="w-8 h-8 rounded-full bg-destructive/10 flex items-center justify-center text-xs font-medium text-destructive flex-shrink-0">
-            SA
+            {initials}
           </div>
           {!collapsed && (
             <div className="min-w-0">
-              <p className="text-xs font-medium text-foreground truncate">Super Admin</p>
-              <p className="text-[10px] text-muted-foreground truncate">root@keel.app</p>
+              <p className="text-xs font-medium text-foreground truncate">
+                {currentUser?.name || "Super Admin"}
+              </p>
+              <p className="text-[10px] text-muted-foreground truncate">
+                {currentUser?.email || "root@keel.app"}
+              </p>
             </div>
           )}
         </div>

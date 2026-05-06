@@ -4,7 +4,7 @@ import { AppHeader } from './AppHeader';
 
 export function SuperAdminLayout({ children }: { children: React.ReactNode }) {
   return (
-    <div className="min-h-screen flex w-full bg-background">
+    <div className="h-screen overflow-hidden flex w-full bg-background">
       <SuperAdminSidebar />
       <div className="flex-1 flex flex-col min-w-0">
         <AppHeader />

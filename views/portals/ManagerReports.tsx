@@ -5,6 +5,8 @@ import { StatCard } from '@/components/shared/StatCard';
 import { SectionLabel } from '@/components/shared/SectionLabel';
 import { Button } from '@/components/ui/button';
 import { FileBarChart, Download } from 'lucide-react';
+import { Line, LineChart, CartesianGrid, XAxis, YAxis } from "recharts";
+import { ChartContainer, ChartTooltip, ChartTooltipContent } from "@/components/ui/chart";
 
 const reports = [
   { name: 'Weekly Operations Summary', desc: 'KPIs across all active modules · Apr 22 — Apr 28', tone: 'blue', updated: '2 hours ago' },
@@ -15,7 +17,15 @@ const reports = [
   { name: 'Workforce Productivity', desc: 'Hours logged, tasks completed per employee', tone: 'green', updated: 'Apr 21' },
 ];
 
-const trend = [40, 55, 48, 70, 62, 78, 84];
+const trendData = [
+  { day: 'Mon', score: 40 },
+  { day: 'Tue', score: 55 },
+  { day: 'Wed', score: 48 },
+  { day: 'Thu', score: 70 },
+  { day: 'Fri', score: 62 },
+  { day: 'Sat', score: 78 },
+  { day: 'Sun', score: 84 },
+];
 
 export default function ManagerReports() {
   return (
@@ -35,21 +45,15 @@ export default function ManagerReports() {
 
       <SectionLabel>Performance trend (7 days)</SectionLabel>
       <div className="bg-card border border-border rounded-lg p-5 mb-5">
-        <div className="flex items-end gap-2 h-32">
-          {trend.map((v, i) => (
-            <motion.div
-              key={i}
-              initial={{ height: 0 }}
-              animate={{ height: `${v}%` }}
-              transition={{ delay: i * 0.05 }}
-              className="flex-1 bg-primary/70 rounded-t-sm"
-              style={{ height: `${v}%` }}
-            />
-          ))}
-        </div>
-        <div className="flex justify-between text-[11px] text-muted-foreground mt-2">
-          {['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'].map(d => <span key={d}>{d}</span>)}
-        </div>
+        <ChartContainer config={{ score: { label: "Score", color: "hsl(var(--primary))" } }} className="h-48 w-full">
+          <LineChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" vertical={false} />
+            <XAxis dataKey="day" tickLine={false} axisLine={false} fontSize={11} tickMargin={8} />
+            <YAxis tickLine={false} axisLine={false} fontSize={11} />
+            <ChartTooltip content={<ChartTooltipContent />} />
+            <Line type="monotone" dataKey="score" stroke="var(--color-score)" strokeWidth={2} dot={{ r: 4 }} activeDot={{ r: 6 }} />
+          </LineChart>
+        </ChartContainer>
       </div>
 
       <SectionLabel>Available reports</SectionLabel>

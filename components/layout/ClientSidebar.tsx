@@ -5,13 +5,19 @@ import { Home, FileText, HelpCircle, ChevronLeft, Bell, Send } from 'lucide-reac
 import { cn } from '@/lib/utils';
 import { useState } from 'react';
 import { useAppContext } from '@/contexts/AppContext';
+import { MOCK_USERS } from '@/types/organisation';
 const keelLogo = '/assets/keel-logo.png';
 
 export function ClientSidebar() {
   const pathname = usePathname();
   const router = useRouter();
-  const { currentOrg } = useAppContext();
+  const { currentOrg, currentRole } = useAppContext();
   const [collapsed, setCollapsed] = useState(false);
+
+  const currentUser = currentOrg 
+    ? MOCK_USERS.find(u => u.orgId === currentOrg.id && u.role === currentRole) || MOCK_USERS.find(u => u.role === currentRole)
+    : MOCK_USERS.find(u => u.role === currentRole) || MOCK_USERS[0];
+  const initials = currentUser?.name.split(" ").map(n => n[0]).join("") || "CL";
 
   const slug = currentOrg?.slug || '';
   const basePath = `/org/${slug}`;
@@ -44,7 +50,7 @@ export function ClientSidebar() {
       <nav className="flex-1 overflow-y-auto py-3 px-2">
         {!collapsed && <p className="text-[10px] uppercase tracking-wider text-muted-foreground px-2 mb-1.5">Client Portal</p>}
         {items.map(item => {
-          const isActive = pathname === item.path;
+          const isActive = pathname === item.path || (item.path !== `${basePath}/portal` && pathname.startsWith(item.path));
           return (
             <button
               key={item.path}
@@ -63,11 +69,11 @@ export function ClientSidebar() {
 
       <div className="border-t border-border p-3 flex-shrink-0">
         <div className="flex items-center gap-2.5">
-          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary flex-shrink-0">CL</div>
+          <div className="w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-xs font-medium text-primary flex-shrink-0">{initials}</div>
           {!collapsed && (
             <div className="min-w-0">
-              <p className="text-xs font-medium text-foreground truncate">Client User</p>
-              <p className="text-[10px] text-muted-foreground truncate">{currentOrg?.contactEmail}</p>
+              <p className="text-xs font-medium text-foreground truncate">{currentUser?.name || "Client User"}</p>
+              <p className="text-[10px] text-muted-foreground truncate">{currentUser?.email || currentOrg?.contactEmail}</p>
             </div>
           )}
         </div>
